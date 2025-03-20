@@ -4,6 +4,7 @@ let poses = [];
 let connections;
 let balls = [];
 let score = 0;
+let containerWidth, containerHeight;
 
 function preload() {
   // Load the bodyPose model
@@ -11,18 +12,35 @@ function preload() {
 }
 
 function setup() {
+  // Get container dimensions from TouchDesigner
+  containerWidth = windowWidth;
+  containerHeight = windowHeight;
+  
+  // Create canvas that fills the TouchDesigner container
+  createCanvas(containerWidth, containerHeight);
+  
   // Get the skeleton connection information
   connections = bodyPose.getSkeleton();
-  createCanvas(640, 480);
-  // Create the video and hide it
+  
+  // Create the video and scale it to match canvas size
   video = createCapture(VIDEO);
-  video.size(640, 480);
+  video.size(containerWidth, containerHeight);
   video.hide();
+  
   bodyPose.detectStart(video, gotPoses);
+  
   // Create initial balls
   for (let i = 0; i < 5; i++) {
     createNewBall();
   }
+}
+
+// Handle window resizing in TouchDesigner
+function windowResized() {
+  containerWidth = windowWidth;
+  containerHeight = windowHeight;
+  resizeCanvas(containerWidth, containerHeight);
+  video.size(containerWidth, containerHeight);
 }
 
 // Callback function for when the model returns pose data
@@ -131,11 +149,12 @@ function checkBallCollision(x, y) {
 }
 
 function drawScore() {
-  // Draw score in the top-left corner
+  // Draw score with size relative to canvas
+  const fontSize = width / 20;
   fill(255);
   stroke(0);
   strokeWeight(2);
-  textSize(32);
+  textSize(fontSize);
   textAlign(LEFT, TOP);
   text("Score: " + score, 20, 20);
 }
